@@ -118,3 +118,84 @@ if effectivePocket >= threshold → Leave
 Greedy（Never Leave）を除くだけで Risky (Best+ArtEV) の勝率が **17% → 72%** に跳ね上がった。  
 これはGreedy戦略が「必ずBurstして全員の場持ちを下げる」という環境ノイズとして機能していたことを示す。  
 実際のゲームでは全員撤退するタイミングが存在するため、現実的な条件下でRiskyStrategyは非常に有効。
+
+---
+
+## 実験 3：EVStrategy導入後（各10万ゲーム）
+
+文献 §3.2 の `E[V] = Upside − Downside` 式を、デッキの残りカードをカウントして動的に計算する **EVStrategy** を実装した結果です。
+
+### EVStrategy の意思決定ロジック
+
+```
+残りデッキを Good / Neutral / Bad に分類:
+  Good  = 残りの財宝カード + アーティファクトカード
+  Bad   = 既に1枚出ているハザード種が残デッキにある枚数（次に引いたらバースト）
+
+goodRate  = Good枚数 / 残り総枚数
+deathRate = Bad枚数  / 残り総枚数
+
+Upside   = Good cardsの平均価値 × goodRate / 滞在プレイヤー数
+Downside = PocketScore × deathRate
+
+if Upside - Downside <= 0 → Leave（期待値がマイナスになったら撤退）
+```
+
+### Scenario: `ev` — EV vs Risky vs Threshold（4人）
+
+```text
+Simulation completed in 10.51s
+Total Games: 100000
+-----------------------------------------------------
+Strategy                  | Win Rate   | Avg Score
+-----------------------------------------------------
+Threshold (2 Hazards)     | 33.14%     | 26.83
+EV (Upside-Downside)      | 31.64%     | 28.68
+Risky (Best+ArtEV)        | 31.27%     | 27.86
+Random 10%                |  9.87%     | 15.99
+-----------------------------------------------------
+```
+
+### Scenario: `all` — 全6戦略総当たり
+
+```text
+Simulation completed in 8.73s
+Total Games: 100000
+-----------------------------------------------------
+Strategy                  | Win Rate   | Avg Score
+-----------------------------------------------------
+EV (Upside-Downside)      | 35.75%     | 26.05
+Risky (Best+ArtEV)        | 33.83%     | 25.04
+Threshold (2 Hazards)     | 16.63%     | 18.66
+Threshold (1 Hazard)      | 10.67%     | 13.72
+Random 10%                |  8.30%     | 12.96
+Random 50%                |  2.14%     |  7.27
+-----------------------------------------------------
+```
+
+---
+
+## 考察（更新）
+
+**4. EVStrategyがallシナリオで首位**
+
+`scenario:all` においてEVStrategyが勝率 **35.75%**、平均スコア **26.05** で最上位。  
+デッキに致死的ハザードが残っているかをリアルタイムに把握し、Downsideが高い局面では早期撤退する動きが有効。
+
+**5. `scenario:ev`（4人）では Threshold がわずかに勝率首位**
+
+| 戦略 | 勝率 | 平均スコア |
+|---|---|---|
+| Threshold (2 Hazards) | 33.14% | 26.83 |
+| EV (Upside-Downside) | 31.64% | **28.68** |
+| Risky (Best+ArtEV) | 31.27% | 27.86 |
+
+勝率ではThresholdがわずかに上回るが、**平均スコアはEVが最高**。  
+EVStrategyは「長期的に高いスコアを安定して積み上げる」傾向がある。
+
+**6. EVとRiskyの相補性**
+
+- **EV**: Downsideを数値で計算するため、悪い状況（致死ハザード多数）では迷わず撤退する。保守的になりすぎるリスクもある。
+- **Risky+ArtEV**: スコアリード・アーティファクトという社会的文脈を判断に組み込む。EVが無視しているプレイヤー間の相互作用を捉える。
+
+両戦略の勝率は拮抗しており（差 < 5%）、純粋な数理最適化（EV）と状況適応型の閾値調整（Risky）が実質的に同等の競争力を持つことが示された。
