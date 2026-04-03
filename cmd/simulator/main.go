@@ -29,6 +29,10 @@ func scenarioAll() []application.PlayerFactory {
 			// More Risky best params (R=2, S1=4, S2=2) + artifact EV
 			return domain.NewPlayer("More Risky (Best+ArtEV)", strategy.NewRiskyStrategy(9, 2, 4, 2, true, "Risky (Best+ArtEV)"))
 		},
+		func() *domain.Player {
+			// Full EV-based: Upside - Downside card counting
+			return domain.NewPlayer("EV", strategy.NewEVStrategy("EV (Upside-Downside)"))
+		},
 	}
 }
 
@@ -76,8 +80,26 @@ func scenarioRiskyVsRisky() []application.PlayerFactory {
 	}
 }
 
+// scenarioEV pits the full EV strategy against the best Risky variant and Threshold.
+func scenarioEV() []application.PlayerFactory {
+	return []application.PlayerFactory{
+		func() *domain.Player {
+			return domain.NewPlayer("EV", strategy.NewEVStrategy("EV (Upside-Downside)"))
+		},
+		func() *domain.Player {
+			return domain.NewPlayer("Risky Best+ArtEV", strategy.NewRiskyStrategy(9, 2, 4, 2, true, "Risky (Best+ArtEV)"))
+		},
+		func() *domain.Player {
+			return domain.NewPlayer("Normal", strategy.NewThresholdStrategy(2, "Threshold (2 Hazards)"))
+		},
+		func() *domain.Player {
+			return domain.NewPlayer("Random 10%", strategy.NewRandomStrategy(0.1, "Random 10%"))
+		},
+	}
+}
+
 func main() {
-	scenarioFlag := flag.String("scenario", "all", "Which strategy scenario to run:\n  all           - All strategies compete head-to-head\n  risky         - Risky strategies vs baselines\n  risky-vs-risky- Compare different Risky parameter sets")
+	scenarioFlag := flag.String("scenario", "all", "Which strategy scenario to run:\n  all           - All strategies compete head-to-head\n  risky         - Risky strategies vs baselines\n  risky-vs-risky- Compare Risky parameter variants\n  ev            - EV (Upside-Downside) vs Risky vs Threshold")
 	numGames := flag.Int("games", 100000, "Number of games to simulate")
 	flag.Parse()
 
@@ -90,6 +112,8 @@ func main() {
 		factories = scenarioRisky()
 	case "risky-vs-risky":
 		factories = scenarioRiskyVsRisky()
+	case "ev":
+		factories = scenarioEV()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown scenario: %q\nUse --help for available options.\n", *scenarioFlag)
 		os.Exit(1)
