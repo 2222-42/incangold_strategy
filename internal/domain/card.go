@@ -118,3 +118,11 @@ func (d *Deck) Draw() *Card {
 	d.drawPile = d.drawPile[1:]
 	return &card
 }
+
+// RemainingCards returns a snapshot of the cards still in the draw pile this round.
+// Strategies can use this to calculate card-counting-based expected values.
+func (d *Deck) RemainingCards() []Card {
+	result := make([]Card, len(d.drawPile))
+	copy(result, d.drawPile)
+	return result
+}
