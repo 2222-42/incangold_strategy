@@ -88,8 +88,11 @@ func (s *RiskyStrategy) Decide(game *domain.Game, round *domain.Round, self *dom
 }
 
 // artifactEstimate estimates the value of claiming the given number of artifacts right now.
+// Returns 0 if artifacts are disabled or count is 0, consistent with Game.ClaimArtifacts.
 func artifactEstimate(game *domain.Game, count int) int {
-	// Peek at what the next artifact(s) would be worth given the collected count so far
+	if !game.ArtifactRule.Enabled || count == 0 {
+		return 0
+	}
 	total := 0
 	collected := game.ArtifactsCollected
 	for i := 0; i < count; i++ {

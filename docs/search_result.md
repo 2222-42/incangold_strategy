@@ -36,9 +36,9 @@ Alan R. MoonおよびBruno Faiduttiによって設計された「インカの黄
 これに基づき、次回の探索ステップに進んだ際の各事象の発生確率は、全体に対するそれぞれの比率として以下のように定式化される 。
   
 
-- `Good rate= Total remaining cards / Good cards`
-​- `Neutral rate= Total remaining cards / Neutral cards`
-​- `Death rate= Total remaining cards / Bad cards`
+- `Good rate= Good cards / Total remaining cards`
+- `Neutral rate= Neutral cards / Total remaining cards`
+- `Death rate= Bad cards / Total remaining cards`
 
  
 ### 3.2 期待値（EV）ベースの意思決定関数の限界と最適化

@@ -66,14 +66,17 @@ func (s *EVStrategy) Decide(game *domain.Game, round *domain.Round, self *domain
 	if goodCount > 0 {
 		// Average value of the good cards (treasure values; artifacts counted at their estimated worth)
 		totalGoodValue := 0.0
+		artifactCount := 0
 		for _, c := range goodCards {
 			switch c.Type {
 			case domain.CardTypeTreasure:
 				totalGoodValue += float64(c.Value)
 			case domain.CardTypeArtifact:
-				// Estimate artifact value based on how many have been collected so far
-				totalGoodValue += float64(artifactEstimate(game, 1))
+				artifactCount++
 			}
+		}
+		if artifactCount > 0 {
+			totalGoodValue += float64(artifactEstimate(game, artifactCount))
 		}
 		avgGoodValue := totalGoodValue / float64(goodCount)
 		upside = avgGoodValue * goodRate / float64(activePlayers)

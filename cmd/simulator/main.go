@@ -99,7 +99,7 @@ func scenarioEV() []application.PlayerFactory {
 }
 
 func main() {
-	scenarioFlag := flag.String("scenario", "all", "Which strategy scenario to run:\n  all           - All strategies compete head-to-head\n  risky         - Risky strategies vs baselines\n  risky-vs-risky- Compare Risky parameter variants\n  ev            - EV (Upside-Downside) vs Risky vs Threshold")
+	scenarioFlag := flag.String("scenario", "all", "Which strategy scenario to run:\n  all           - All strategies compete head-to-head\n  risky         - Risky strategies vs baselines\n  risky-vs-risky - Compare Risky parameter variants\n  ev            - EV (Upside-Downside) vs Risky vs Threshold")
 	numGames := flag.Int("games", 100000, "Number of games to simulate")
 	flag.Parse()
 
